@@ -263,10 +263,10 @@ def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, strin
 	#plt.xlim(ra0+fov, ra0-fov, 10)
 	#plt.ylim(dec0-fov, dec0+fov, 10)
 	# Draw circle showing fov.
-	#theta = np.linspace(0, 2 * np.pi, 50)
-	#x = ra0 + 0.5 * fov * np.cos(theta) / cos_dec0
-	#y = dec0 + 0.5 * fov * np.sin(theta)
-	#ax.plot(x, y, ls=':', c='gray', label='FOV')
+	theta = np.linspace(0, 2 * np.pi, 50)
+	x = ra0 + 0.5 * fov * np.cos(theta) / cos_dec0
+	y = dec0 + 0.5 * fov * np.sin(theta)
+	ax.plot(x, y, ls=':', c='gray', label='FOV')
 	if location is not None:
 		plt.legend(loc=location)
 	else:
