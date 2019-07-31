@@ -198,16 +198,11 @@ def separation_matrix(ra1, dec1, ra2, dec2, max_separation=None):
 def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, string=None, nsteps=10, oversampling=5, location = None):
 	"""
 	"""
-	if string is not None:
-		satellites={}
-		for name in string:
-			satellites.update(get_satellites(name))
-			#append(get_satellites(name))
-		#if string == None:
-		#satellites=load_satellites(reload=False)  #if I try this as satellites=satellites I get an assignment error.
-		#satellites=satellites
-	#else:
-	#    satellites=get_satellites(string)
+	if groups is not None:
+		satellitess={}
+		for name in groups:
+			satellitess.update(get_satellites(satellites, name))
+		satellites=satellitess
 	cos_dec0 = np.cos(np.deg2rad(dec0))
 	# Calculate the end time of this exposure.
 	tend = ts.utc(tbegin.utc_datetime() + datetime.timedelta(seconds=exptime))
@@ -250,7 +245,7 @@ def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, strin
 			#names.append(satellite.name)
 			ravec.append(ra_deg)
 			decvec.append(dec_deg)
-		if string is not None:
+		if groups is not None:
 			names.append(satellite.name)
 	#plt.xlim(ra0 - 2 * fov / cos_dec0, ra0 + 2 * fov / cos_dec0)
 	#plt.ylim(dec0 - 2 * fov, dec0 + 2 * fov)
