@@ -7,6 +7,7 @@ from_localtime
 separation_matrix # this is from another file but is needed for other functions
 get_pos
 get_visible
+radec
 '''
 #importing all necessary functions
 import matplotlib.pyplot as plt
@@ -133,8 +134,8 @@ def from_localtime(*args, tzoffset = -7):
 	return ts.tai_jd(ts.utc(*args).tai - tzoffset / 24)
 
 
-def get_pos(where, when, string):
-    which = get_satellites(string)
+def get_pos(where, when, string, satellites):
+    which = get_satellites(satellites, string)
     for satellite in which.values():
         # Calculate satellite position relative to the observer at each time step.
         topocentric = (satellite - where).at(when)
@@ -195,7 +196,7 @@ def separation_matrix(ra1, dec1, ra2, dec2, max_separation=None):
         return np.rad2deg(np.arccos(np.clip(1 - 2 * havPHI, -1, +1)))
 
 
-def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, string=None, nsteps=10, oversampling=5, location = None):
+def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, groups=None, nsteps=10, oversampling=5, location = None):
 	"""
 	"""
 	if groups is not None:
@@ -247,16 +248,16 @@ def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, strin
 			decvec.append(dec_deg)
 		if groups is not None:
 			names.append(satellite.name)
-	#plt.xlim(ra0 - 2 * fov / cos_dec0, ra0 + 2 * fov / cos_dec0)
-	#plt.ylim(dec0 - 2 * fov, dec0 + 2 * fov)
-	plt.xlabel('RA (deg)')
-	plt.ylabel('DEC (deg)')
+	plt.xlim(ra0 - 2 * fov / cos_dec0, ra0 + 2 * fov / cos_dec0)
+	plt.ylim(dec0 - 2 * fov, dec0 + 2 * fov)
+	plt.xlabel('RA [deg]')
+	plt.ylabel('DEC [deg]')
 	plt.title(title)
 	ax = plt.gca()
 	ax.invert_xaxis()
 	ax.set_aspect(1 / cos_dec0)
-	#plt.xlim(ra0+fov, ra0-fov, 10)
-	#plt.ylim(dec0-fov, dec0+fov, 10)
+	#plt.xlim(ra0+15, ra0-15, nsteps)
+	#plt.ylim(dec0-15, dec0+15, nsteps)
 	# Draw circle showing fov.
 	theta = np.linspace(0, 2 * np.pi, 50)
 	x = ra0 + 0.5 * fov * np.cos(theta) / cos_dec0
@@ -269,3 +270,19 @@ def get_visible(where, tbegin, exptime, ra0, dec0, fov, satellites, title, strin
 	plt.grid()
 	plt.savefig(title)
 	return names, ravec, decvec
+
+def radec(satellite, where, tbegin, exptime):
+	#satellite is an EarthSatellite object from skyfield
+	#where is the skyfield.Topos object with lat, lon, and alt
+	#tbegin is the beginning time to calculate position
+	#exptime is how long to calculate for in seconds
+	ra, dec = [], []
+	time_delta = np.linspace(0, exptime, exptime)
+	for second in time_delta:
+		time = ts.utc(tbegin.utc_datetime() + datetime.timedelta(seconds=second))
+		difference = satellite - where
+		topocentric = difference.at(time)
+		ra2, dec2, d2 = topocentric.radec() #ICRF COORDS SINCE EPOCH NOT SPECIFIED
+		ra.append(ra2._degrees)
+		dec.append(dec2._degrees)
+	return ra, dec
