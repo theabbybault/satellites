@@ -276,7 +276,16 @@ def radec(satellite, where, tbegin, exptime):
 	#where is the skyfield.Topos object with lat, lon, and alt
 	#tbegin is the beginning time to calculate position
 	#exptime is how long to calculate for in seconds
-	ra, dec = [], []
+        '''example for ISS:
+        satellites = load.tle("link/to/tle/file.txt")
+        satellite_iss = satellites['ISS (ZARYA)']
+        KPNO = skyfield.toposlib.Topos(lat_degrees = a number, lon_degrees = a number, elevation_meters = a number)
+        ts = skyfield.api.load.timescale()
+        time = ts.utc(year, month, day, hour, minute, second)
+        exposure = 110 #seconds
+        ra, dec = radec(satellite_iss, KPNO, time, exposure)
+        ra1, dec1 = radec(satellite_iss, KPNO, time, 110)'''
+        ra, dec = [], []
 	time_delta = np.linspace(0, exptime, exptime)
 	for second in time_delta:
 		time = ts.utc(tbegin.utc_datetime() + datetime.timedelta(seconds=second))
